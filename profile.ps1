@@ -1,24 +1,34 @@
-﻿$IsAdmin = & {
+﻿# I customize the shell to use 16pt Consolas with a window opacity of 90%
+# If I knew how you could change that programatically I'd automate this bit.
+
+# Detect elevation
+$IsAdmin = & {
     $wid = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     $prp = new-object System.Security.Principal.WindowsPrincipal($wid)
     $adm = [System.Security.Principal.WindowsBuiltInRole]::Administrator
     $prp.IsInRole($adm)
 }
 
+# If elevated, set the background to red in order to easily identify this
 if ($IsAdmin) {
     (get-host).UI.RawUI.Backgroundcolor="DarkRed"
 }
 clear-host
 
+# Configure environment variables
 Set-Variable -Name ProfileDir -Value (Split-Path $profile)
 $env:Editor = 'code'
 
-# Add Scripts directories to path
-& "$(Join-Path $PSScriptRoot scripts\Add-Path.ps1)" $(Join-Path $PSScriptRoot scripts)
-if (Test-Path (Join-Path $PSScriptRoot "${env:COMPUTERNAME}\scripts")) {
-    Add-Path (Join-Path $PSScriptRoot "${env:COMPUTERNAME}\scripts")
-}
+# Dot source functions
+(Join-Path $PSScriptRoot 'Functions'),(Join-Path $PSScriptRoot "${env:COMPUTERNAME}\Functions") |
+    Where-Object { Test-Path $_ } |
+    ForEach-Object {
+        Get-ChildItem $_ | ForEach-Object {
+            . $_.FullName
+        }
+    }
 
+# If we have a bin folder add it to the path
 if (Test-Path ~\bin) {
     Add-Path ~\bin
 }
@@ -36,6 +46,6 @@ if (Get-Module -Name Z -ListAvailable) {
 }
 
 # Invoke machine specific profile
-if (Test-Path (Join-Path $PSScriptRoot "${env:COMPUTERNAME}\$($MyInvocation.MyCommand.Name)")) {
-    . (Join-Path $PSScriptRoot "${env:COMPUTERNAME}\$($MyInvocation.MyCommand.Name)")
-}
+@(Join-Path $PSScriptRoot "${env:COMPUTERNAME}\$($MyInvocation.MyCommand.Name)") |
+    Where-Object { Test-Path $_ } |
+    ForEach-Object { . $_ }
