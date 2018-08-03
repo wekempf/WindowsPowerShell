@@ -17,7 +17,12 @@ clear-host
 
 # Configure environment variables
 Set-Variable -Name ProfileDir -Value (Split-Path $profile)
-$env:Editor = 'code'
+if (Get-Command 'code' -ErrorAction SilentlyContinue) {
+    $env:Editor = 'code'
+}
+else {
+    $env:Editor = "notepad"
+}
 
 # Dot source functions
 (Join-Path $PSScriptRoot 'Functions'),(Join-Path $PSScriptRoot "${env:COMPUTERNAME}\Functions") |
@@ -38,6 +43,20 @@ if (Get-Module -Name posh-git -ListAvailable) {
     Import-Module posh-git
     $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
     $GitPromptSettings.DefaultPromptPath = '$(Get-ShortLocationName)'
+
+    Start-SshAgent
+
+    function g {
+        [CmdletBinding()]
+        param(
+            [Parameter(Mandatory = $False, ValueFromRemainingArguments = $True)]
+            $Arguments
+        )
+        if (-not $Arguments) {
+            $Arguments = @('status')
+        }
+        git @Arguments
+    }
 }
 
 # Load Z
