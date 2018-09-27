@@ -68,3 +68,8 @@ if (Get-Module -Name Z -ListAvailable) {
 @(Join-Path $PSScriptRoot "${env:COMPUTERNAME}\$($MyInvocation.MyCommand.Name)") |
     Where-Object { Test-Path $_ } |
     ForEach-Object { . $_ }
+
+# The following command can turn on Virtual Terminal (ANSI escape code) support for all
+# processes. This *may* break some things, so I may need to remove this value in the
+# future?
+# set-itemproperty -path hkcu:\console -name VirtualTerminalLevel -Value 1
