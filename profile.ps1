@@ -9,12 +9,6 @@ $IsAdmin = & {
     $prp.IsInRole($adm)
 }
 
-# If elevated, set the background to red in order to easily identify this
-if ($IsAdmin) {
-    (get-host).UI.RawUI.Backgroundcolor="DarkRed"
-}
-clear-host
-
 # Configure environment variables
 Set-Variable -Name ProfileDir -Value (Split-Path $profile)
 if (Get-Command 'code' -ErrorAction SilentlyContinue) {
@@ -43,19 +37,11 @@ if (Get-Module -Name posh-git -ListAvailable) {
     Import-Module posh-git
     $GitPromptSettings.DefaultPromptAbbreviateHomeDirectory = $true
     $GitPromptSettings.DefaultPromptPath = '$(Get-ShortLocationName)'
-
-    Start-SshAgent
-
-    function g {
-        [CmdletBinding()]
-        param(
-            [Parameter(Mandatory = $False, ValueFromRemainingArguments = $True)]
-            $Arguments
-        )
-        if (-not $Arguments) {
-            $Arguments = @('status')
-        }
-        git @Arguments
+    $GitPromptSettings.WorkingForegroundColor='Yellow'
+    $GitPromptSettings.LocalWorkingStatusForegroundColor='Red'
+    if ($IsAdmin) {
+        $GitPromptSettings.DefaultPromptSuffix = "$('$' * ($nestedPromptLevel + 1)) "
+        $GitPromptSettings.DefaultPromptDebugSuffix = " [DBG]$('$' * ($nestedPromptLevel + 1)) "
     }
 }
 
