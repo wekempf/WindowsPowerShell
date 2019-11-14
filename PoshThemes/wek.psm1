@@ -61,6 +61,12 @@ function Write-Theme {
     $prompt += Write-Prompt -Object $sl.PromptSymbols.SegmentForwardSymbol -ForegroundColor $lastColor
     $prompt += ' '
     $prompt
+
+    If (Test-Administrator) {
+        $host.ui.RawUI.WindowTitle = "Admin: Windows PowerShell " + (Get-Location)
+    } else {
+        $host.ui.RawUI.WindowTitle = "Windows PowerShell " + (Get-Location)
+    }
 }
 
 $sl = $global:ThemeSettings #local settings
@@ -68,9 +74,12 @@ $sl.PromptSymbols.SegmentForwardSymbol = [char]::ConvertFromUtf32(0xE0B0)
 $sl.Colors.PromptForegroundColor = [ConsoleColor]::White
 $sl.Colors.PromptSymbolColor = [ConsoleColor]::White
 $sl.Colors.PromptHighlightColor = [ConsoleColor]::DarkBlue
+
 $sl.Colors.GitForegroundColor = [ConsoleColor]::White
-$sl.Colors.GitDefaultColor = [ConsoleColor]::DarkCyan
-$sl.Colors.GitLocalChangesColor = [ConsoleColor]::DarkGreen
+$sl.Colors.GitDefaultColor = [ConsoleColor]::Blue
+$sl.Colors.GitLocalChangesColor = [ConsoleColor]::DarkCyan
+$sl.Colors.GitNoLocalChangesAndAheadColor = [ConsoleColor]::DarkGreen
+
 $sl.Colors.WithForegroundColor = [ConsoleColor]::White
 $sl.Colors.WithBackgroundColor = [ConsoleColor]::DarkRed
 $sl.Colors.VirtualEnvBackgroundColor = [System.ConsoleColor]::Red
